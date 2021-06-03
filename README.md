@@ -4,7 +4,9 @@ A python application for manipulating pandas data frames from the comfort of you
 
 # Installation
 
-Currently there are two components to this application, they are: flowpyapi - the python backend, and flowpystudio - the react web front end.
+Currently there are two components to this application, they are: 
+* flowpyapi - the python backend 
+* flowpystudio - the react web front end
 
 technically the react front end can be built and expressed via FastAPI's static funcitonality, but right now in pre alpha they are just run from seperate terminals to keep development as smooth as possible.
 
