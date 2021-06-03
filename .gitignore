@@ -1,0 +1,19 @@
+
+# ignore venv
+venv
+
+# ignore __pycache__
+**/__pycache__
+
+# ignore node_components
+**/node_modules
+
+# ignore vscode
+.vscode
+
+# ignore app.db
+app.db
+
+# ignore old folders
+peltapi-old
+peltstudio-old

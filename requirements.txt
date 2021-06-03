@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pydantic
+pandas
+humanize
+networkx
