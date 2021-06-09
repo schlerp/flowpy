@@ -2,6 +2,7 @@ import fastapi
 from fastapi.middleware.cors import CORSMiddleware
 
 from flowpyapi.routes import flows, operations, nodes
+from flowpyapi.persist.flows import save_json, load_json
 
 
 app = fastapi.FastAPI(
@@ -12,8 +13,8 @@ app = fastapi.FastAPI(
 
 
 # # set up application database
-# app.add_event_handler("startup", connect_db)
-# app.add_event_handler("shutdown", close_db)
+app.add_event_handler("startup", load_json)
+app.add_event_handler("shutdown", save_json)
 
 
 # add router endpoints

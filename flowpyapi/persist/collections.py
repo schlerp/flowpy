@@ -5,8 +5,9 @@ import pydantic
 class MongoLikeCollection(object):
     """implements a basic pymongo-like interface to a collection"""
 
-    def __init__(self, collection: List[Any] = []):
-        self._collection = collection
+    def __init__(self, collection: List[Any] = None):
+        # parameter default [] is shared between classes hence the None shenanigans
+        self._collection = collection or []
 
     def _try_get_object_and_id(_id: str, obj_collection: List):
         for idx, obj in enumerate(obj_collection):
@@ -18,7 +19,9 @@ class MongoLikeCollection(object):
         for idx, obj in enumerate(self._collection):
             filter_matches = []
             for key, val in filter.items():
-                if obj.__dict__.get(key) == val:
+                if type(obj) != dict:
+                    obj = obj.__dict__
+                if obj.get(key) == val:
                     filter_matches.append(True)
                 else:
                     filter_matches.append(False)
@@ -46,6 +49,7 @@ class MongoLikeCollection(object):
         upsert: bool = False,
     ):
         done = False
+        print("update_one", update)
         for matched_idx in self._yield_match_idx(filter):
             # we have a match so we dont need to insert later
             done = True

@@ -95,29 +95,46 @@ const FlowDesigner = memo((props) => {
     );
   };
 
-  const runNode = (node) => {
-    console.log(node);
-    const flow = reactFlowInstance.toObject();
-    const flowDefinition = { id: props.flowKey, ...flow };
-    // TODO: create = post, should rename
-    api.nodes.create({
-      uniqueId: node.id,
-      nodeType: node.data.nodeType,
-      nodeSubtype: node.data.nodeSubtype,
-      name: node.data.name,
-      args: node.data.args.filter((arg) => {
+  const runNode = useCallback(
+    (node) => {
+      console.log(node);
+      const flow = reactFlowInstance.toObject();
+      const flowDefinition = { id: props.flowId, ...flow };
+      // TODO: create = post, should rename
+      api.nodes.create({
+        uniqueId: node.id,
+        nodeType: node.data.nodeType,
+        nodeSubtype: node.data.nodeSubtype,
+        name: node.data.name,
+        args: node.data.args.filter((arg) => {
+          if (arg.name !== "id") {
+            return true;
+          }
+          return false;
+        }),
+      });
+      const runResult = api.nodes.command("run", {
+        uniqueId: node.id,
+        flow: flowDefinition,
+      });
+      runResult.then((data) => console.log(data));
+    },
+    [props.flowId, reactFlowInstance]
+  );
+
+  const nodeRunMetaData = async (uniqueId, operationDef) =>
+    await api.nodes.create({
+      uniqueId: uniqueId,
+      nodeType: operationDef.nodeType,
+      nodeSubtype: operationDef.nodeSubtype,
+      name: operationDef.name,
+      args: operationDef.args.filter((arg) => {
         if (arg.name !== "id") {
           return true;
         }
         return false;
       }),
     });
-    const runResult = api.nodes.command("run", {
-      uniqueId: node.id,
-      flow: flowDefinition,
-    });
-    runResult.then((data) => console.log(data));
-  };
 
   const onDrop = (event) => {
     event.preventDefault();
@@ -132,20 +149,6 @@ const FlowDesigner = memo((props) => {
     );
     const uniqueId = getId();
 
-    const nodeRunMetaData = async () =>
-      await api.nodes.create({
-        uniqueId: uniqueId,
-        nodeType: operationDef.nodeType,
-        nodeSubtype: operationDef.nodeSubtype,
-        name: operationDef.name,
-        args: operationDef.args.filter((arg) => {
-          if (arg.name !== "id") {
-            return true;
-          }
-          return false;
-        }),
-      });
-
     const newNode = {
       id: uniqueId,
       type: operationDef.nodeType,
@@ -158,7 +161,7 @@ const FlowDesigner = memo((props) => {
         nodeSubtype: operationDef.nodeSubtype,
         updateNode: updateNode,
         runNode: runNode,
-        nodeRunMetaData: nodeRunMetaData(),
+        nodeRunMetaData: nodeRunMetaData(uniqueId, operationDef),
       },
     };
     setElements((es) => es.concat(newNode));
@@ -173,30 +176,56 @@ const FlowDesigner = memo((props) => {
   const onSave = useCallback(() => {
     if (reactFlowInstance) {
       const flow = reactFlowInstance.toObject();
-      const flowDefinition = { id: props.flowKey, ...flow };
+      const flowDefinition = { id: props.flowId, ...flow };
       console.log(flowDefinition);
       const resp = api.flows.create(flowDefinition);
       resp.then((data) => console.log(data)).catch((e) => console.log(e));
     }
-  }, [reactFlowInstance, props.flowKey]);
+  }, [reactFlowInstance, props.flowId]);
 
   const onRestore = useCallback(() => {
     const restoreFlow = async () => {
-      const resp = api.flows.read(props.flowKey);
+      const resp = api.flows.read(props.flowId);
       resp
         .then((data) => data.json())
         .then((flow) => {
           console.log(flow);
           if (flow) {
             const [x = 0, y = 0] = flow.position;
-            setElements(flow.elements || []);
+            setElements(
+              flow.elements.map((el) => {
+                if (!el.hasOwnProperty("data")) {
+                  return el;
+                }
+                const newNode = {
+                  id: el.id,
+                  type: el.type,
+                  position: el.position,
+                  className: el.className,
+                  data: {
+                    args: el.data.args,
+                    name: el.data.name,
+                    nodeType: el.data.nodeType,
+                    nodeSubtype: el.data.nodeSubtype,
+                    updateNode: updateNode,
+                    runNode: runNode,
+                    nodeRunMetaData: nodeRunMetaData(el.id, el.data),
+                  },
+                };
+                return newNode;
+              }) || []
+            );
             transform({ x, y, zoom: flow.zoom || 0 });
           }
         });
     };
 
     restoreFlow();
-  }, [setElements, transform, props.flowKey]);
+  }, [props.flowId, runNode, transform]);
+
+  useEffect(() => {
+    onRestore();
+  }, [onRestore, props.flowId]);
 
   return (
     <div className={classes.flowdesigner}>

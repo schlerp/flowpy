@@ -17,6 +17,20 @@ class ProcessorQueryNode(ProcessorNode):
         self.df = input_node.df.query(self.query_string)
 
 
+class ProcessorSetIndexNode(ProcessorNode):
+    _node_subtype = "set_index"
+    _node_name = "Set Index"
+
+    def __init__(self, id: str, index_cols: List[str]):
+        super().__init__(id)
+        self.index_cols = index_cols
+
+    def _process(self, input_nodes: List[Node]):
+        # TODO: fix multiple input nodes instead of defaulting to first
+        input_node = input_nodes[0]
+        self.df = input_node.df.set_index(self.index_cols)
+
+
 # class ProcessorSelectColumnsNode(ProcessorNode):
 #     _node_subtype = "select"
 #     _node_name = "Select Columns"

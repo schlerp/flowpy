@@ -11,7 +11,7 @@ const Resource = (apiRoot, resName) => ({
       method: "GET",
     });
   },
-  readall: function read() {
+  readAll: function read() {
     return fetch(`${apiRoot}/${resName}`, {
       method: "GET",
     });

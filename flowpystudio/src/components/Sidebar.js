@@ -62,7 +62,7 @@ export function Sidebar(props) {
 
   useEffect(() => {
     api.operations
-      .readall()
+      .readAll()
       .then((resp) => resp.json())
       .then((json) => setAPIOperations(json));
   }, []);

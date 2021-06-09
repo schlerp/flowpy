@@ -1,4 +1,3 @@
-from flowpyapi.processing.flow import run_node
 from typing import List, Union
 from fastapi import APIRouter
 from fastapi import Response
@@ -7,6 +6,7 @@ from fastapi import HTTPException
 
 from flowpyapi.persist import schemas
 from flowpyapi.persist.nodes import get_nodes_collection, create_node
+from flowpyapi.processing.flow import run_node
 
 
 tags_metadata = [

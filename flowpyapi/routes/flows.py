@@ -25,7 +25,7 @@ router = APIRouter()
 async def api_get_all_flows(response: Response):
     """Get all defined flow definitions matching the filters and pagination."""
     flows_collection = await get_flows_collection()
-    return [x async for x in flows_collection.find()]
+    return [x for x in flows_collection.find()]
 
 
 @router.post(
@@ -37,6 +37,7 @@ async def api_get_all_flows(response: Response):
 async def api_create_flow(flow: schemas.FlowSchema):
     """Create a new flow definition"""
     flows_collection = await get_flows_collection()
+    print(flow.dict())
     await flows_collection.update_one(
         filter={"id": flow.id},
         update=flow.dict(),
@@ -69,9 +70,10 @@ async def api_update_flow(flow_id: str, flow: schemas.FlowSchema):
         return Response("flow object id and url do not match!", status_code=400)
 
     flows_collection = await get_flows_collection()
+    print(flow.dict())
     await flows_collection.update_one(
         filter={"id": flow_id},
-        update=flow,
+        update=flow.dict(),
         upsert=True,
     )
     return await flows_collection.find_one(filter={"id": flow_id})
