@@ -21,7 +21,7 @@ const useStyles = makeStyles({
     paddingRight: "10px",
     paddingTop: "5px",
     paddingBottom: "5px",
-    boxShadow: "2px 2px 5px grey",
+    boxShadow: "2px 2px 5px lightgrey",
   },
   defaultNode: {
     borderColor: "#000000",
